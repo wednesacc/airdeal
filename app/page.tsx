@@ -6,38 +6,43 @@ import { supabase } from '../lib/supabase'
 import styles from './page.module.css'
 import koLocale from '@fullcalendar/core/locales/ko'
 
+const convertToKST = (utcDateStr: string) => {
+  if (!utcDateStr) return null
+  const utc = new Date(utcDateStr)
+  const kst = new Date(utc.getTime() + 9 * 60 * 60 * 1000)
+  return kst.toISOString().split('T')[0]
+}
+
 export default function Home() {
   const [events, setEvents] = useState<any[]>([])
 
   useEffect(() => {
     const fetchDeals = async () => {
-      const { data, error } = await supabase.from('flight_deals').select('*')
-      if (error) {
-        console.error(error)
-        return
-      }
+      try {
+        const { data, error } = await supabase.from('flight_deals').select('*')
+        if (error) {
+          console.error('Supabase fetch error:', error)
+          return
+        }
 
-      const convertToKST = (utcDateStr: string) => {
-        if (!utcDateStr) return null
-        const utc = new Date(utcDateStr)
-        const kst = new Date(utc.getTime() + 9 * 60 * 60 * 1000)
-        return kst.toISOString().split('T')[0]
-      }
+        if (!data) return
 
-      const mapped = data.map((deal: any) => ({
-        title: `✈️ ${deal.airline}
-🔹 ${deal.deal_name}`,
-        start: convertToKST(deal.booking_start),
-        url: deal.source_url,
-        extendedProps: {
-          description: `✈️${deal.airline} - ${deal.deal_name}✈️
+        const mapped = data.map((deal: any) => ({
+          title: `✈️ ${deal.airline}\n🔹 ${deal.deal_name}`,
+          start: convertToKST(deal.booking_start),
+          url: deal.source_url,
+          extendedProps: {
+            description: `✈️${deal.airline} - ${deal.deal_name}✈️
 📍특가노선: ${deal.department}–${deal.arrival}
 📍할인정보: ${deal.discount_rate ?? ''}
 📍특이사항: ${deal.description ?? ''}`,
-        },
-      }))
+          },
+        }))
 
-      setEvents(mapped)
+        setEvents(mapped)
+      } catch (err) {
+        console.error('fetchDeals failed:', err)
+      }
     }
 
     fetchDeals()
@@ -70,18 +75,20 @@ export default function Home() {
 
             const tooltip = document.createElement('div')
             tooltip.innerHTML = description.replace(/\n/g, '<br>')
-            tooltip.style.position = 'absolute'
-            tooltip.style.background = '#333'
-            tooltip.style.color = 'white'
-            tooltip.style.padding = '6px 12px'
-            tooltip.style.borderRadius = '12px'
-            tooltip.style.fontSize = '12px'
-            tooltip.style.zIndex = '9999'
-            tooltip.style.whiteSpace = 'nowrap'
-            tooltip.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'
-            tooltip.style.transition = 'opacity 0.2s ease'
-            tooltip.style.opacity = '0'
-            tooltip.style.pointerEvents = 'auto'
+            Object.assign(tooltip.style, {
+              position: 'absolute',
+              background: '#333',
+              color: 'white',
+              padding: '6px 12px',
+              borderRadius: '12px',
+              fontSize: '12px',
+              zIndex: '9999',
+              whiteSpace: 'nowrap',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              transition: 'opacity 0.2s ease',
+              opacity: '0',
+              pointerEvents: 'auto',
+            })
 
             let hideTimeout: ReturnType<typeof setTimeout> | null = null
             let tooltipVisible = false
@@ -109,24 +116,21 @@ export default function Home() {
               }, 200)
             }
 
-            // 툴팁 위에서도 유지
             tooltip.addEventListener('mouseenter', () => {
               if (hideTimeout) clearTimeout(hideTimeout)
             })
-            tooltip.addEventListener('mouseleave', () => {
-              hideTooltip()
-            })
 
-            // 카드 영역 호버
+            tooltip.addEventListener('mouseleave', hideTooltip)
+
             info.el.addEventListener('mouseenter', () => {
               if (hideTimeout) clearTimeout(hideTimeout)
               showTooltip()
             })
+
             info.el.addEventListener('mouseleave', () => {
               hideTimeout = setTimeout(hideTooltip, 200)
             })
 
-            // 모바일 대응: 클릭으로 토글
             info.el.addEventListener('click', (e) => {
               e.preventDefault()
               tooltipVisible ? hideTooltip() : showTooltip()

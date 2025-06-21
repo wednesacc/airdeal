@@ -1,25 +1,3 @@
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* 다크 모드 테마 변수 재정의 */
-    --foreground: #ededed;
-    --background: #0a0a0a;
-    --gray-rgb: 255, 255, 255;
-    --gray-alpha-200: rgba(var(--gray-rgb), 0.12);
-    --gray-alpha-100: rgba(var(--gray-rgb), 0.06);
-    --button-primary-hover: #bbb;
-    --button-secondary-hover: #1c1c1c;
-    --text-main: #ededed;
-    --text-subtle: #9e9e9e;
-    --bg-main: #0a0a0a;
-    --bg-light: #1c1c1e;
-    --bg-hover: #2c2c2e;
-    --border-light: #3a3a3c;
-    --accent: #222427;
-    --toolbar-bg: #1a1a1a;
-  }
-}
-
 .page {
   /* 전체 페이지 스타일 */
   max-width: 960px;

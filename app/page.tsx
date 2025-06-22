@@ -54,7 +54,7 @@ export default function Home() {
           아래 버튼을 눌러 의견을 보내주시면 큰 도움이 됩니다 ✍️
         </h3>
         <a
-          href="https://docs.google.com/forms/d/e/1FAIpQLSdEXAMPLEFORM"
+          href="https://forms.gle/CJn3ZiHdDCwk7znE7"
           target="_blank"
           rel="noopener noreferrer"
           className={styles['form-button']}
@@ -74,10 +74,10 @@ export default function Home() {
               className={`${styles['deal-card']} ${isExpired ? styles['expired'] : ''}`}
               onClick={() => openModal(deal)}
             >
-              <h2>{title}</h2>
-              <p>{deal.department} → {deal.arrival}</p>
-              <p>{deal.discount_rate}</p>
-              <p>{formatKSTDate(deal.booking_start)} - {formatKSTDate(deal.booking_end)}</p>
+              <h2>✈️ {title}</h2>
+              <p>🌐 {deal.department} → {deal.arrival}</p>
+              <p>📅 {deal.discount_rate}</p>
+              <p>🎫 {formatKSTDate(deal.booking_start)} - {formatKSTDate(deal.booking_end)}</p>
             </div>
           )
         })}

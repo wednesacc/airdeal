@@ -13,6 +13,13 @@ export default function Home() {
   const [deals, setDeals] = useState<any[]>([])
   const [selectedDeal, setSelectedDeal] = useState<any | null>(null)
 
+  const getFullUrl = (url: string) => {
+    if (!url) return '#'
+    return url.startsWith('http://') || url.startsWith('https://')
+      ? url
+      : `https://${url}`
+  }
+
   useEffect(() => {
     const fetchDeals = async () => {
       const { data, error } = await supabase.from('flight_deals').select('*')
@@ -95,12 +102,12 @@ export default function Home() {
             <p><strong>할인정보:</strong> {selectedDeal.discount_rate}</p>
             <p><strong>예약기간:</strong> {formatKSTDate(selectedDeal.booking_start)} - {formatKSTDate(selectedDeal.booking_end)}</p>
             <p><strong>특이사항:</strong> {selectedDeal.description}</p>
-            <button
-              className={styles['go-button']}
-              onClick={() => window.open(selectedDeal.source_url, '_blank')}
-            >
-              특가 보러가기
-            </button>
+          <button
+            className={styles['go-button']}
+            onClick={() => window.open(getFullUrl(selectedDeal.source_url), '_blank')}
+          >
+            특가 보러가기
+          </button>
           </div>
         </div>
       )}

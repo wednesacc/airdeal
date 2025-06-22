@@ -103,9 +103,7 @@ export default function Home() {
               }}
             >
               <h2>✈️ {title}</h2>
-              <p>🌐 {deal.department} → {deal.arrival}</p>
-              <p>📅 {deal.discount_rate}</p>
-              <p>🎫 {formatKSTDate(deal.booking_start)} - {formatKSTDate(deal.booking_end)}</p>
+              <p>📅 {formatKSTDate(deal.booking_start)} - {formatKSTDate(deal.booking_end)}</p>
             </div>
           )
         })}

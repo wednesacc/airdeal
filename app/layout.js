@@ -13,7 +13,7 @@ const GeistMono = Geist_Mono({
 
 export const metadata = {
   title: "AirDeal : 항공사 프로모션 피드 서비스",
-  description: "여행을 꿈꾸는 모두를 위해 항공사별 프로모션을 쉽게 모아보는 피드 서비스",
+  description: "여행을 꿈꾸는 모두를 위한 항공사별 프로모션을 쉽게 모아보는 피드 서비스",
 };
 
 export default function RootLayout({ children }) {

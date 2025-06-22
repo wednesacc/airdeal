@@ -1,143 +1,109 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import FullCalendar from '@fullcalendar/react'
-import dayGridPlugin from '@fullcalendar/daygrid'
 import { supabase } from '../lib/supabase'
 import styles from './page.module.css'
-import koLocale from '@fullcalendar/core/locales/ko'
 
-const convertToKST = (utcDateStr: string) => {
-  if (!utcDateStr) return null
-  const utc = new Date(utcDateStr)
+const formatKSTDate = (utcStr: string) => {
+  const utc = new Date(utcStr)
   const kst = new Date(utc.getTime() + 9 * 60 * 60 * 1000)
-  return kst.toISOString().split('T')[0]
+  return kst.toISOString().slice(0, 10) // yyyy-mm-dd
 }
 
 export default function Home() {
-  const [events, setEvents] = useState<any[]>([])
+  const [deals, setDeals] = useState<any[]>([])
+  const [selectedDeal, setSelectedDeal] = useState<any | null>(null)
 
   useEffect(() => {
     const fetchDeals = async () => {
-      try {
-        const { data, error } = await supabase.from('flight_deals').select('*')
-        if (error) {
-          console.error('Supabase fetch error:', error)
-          return
-        }
-
-        if (!data) return
-
-        const mapped = data.map((deal: any) => ({
-          title: `✈️ ${deal.airline}\n🔹 ${deal.deal_name}`,
-          start: convertToKST(deal.booking_start),
-          url: deal.source_url,
-          extendedProps: {
-            description: `✈️${deal.airline} - ${deal.deal_name}✈️
-📍특가노선: ${deal.department}–${deal.arrival}
-📍할인정보: ${deal.discount_rate ?? ''}
-📍특이사항: ${deal.description ?? ''}`,
-          },
-        }))
-
-        setEvents(mapped)
-      } catch (err) {
-        console.error('fetchDeals failed:', err)
+      const { data, error } = await supabase.from('flight_deals').select('*')
+      if (error) {
+        console.error('Supabase fetch error:', error)
+        return
       }
+
+        const now = new Date().getTime()
+
+        const sorted = (data || []).sort((a, b) => {
+          const aEnd = new Date(a.booking_end).getTime()
+          const bEnd = new Date(b.booking_end).getTime()
+          const aExpired = aEnd < now
+          const bExpired = bEnd < now
+
+          if (aExpired !== bExpired) return aExpired ? 1 : -1 // ✅ 마감된 항목은 뒤로
+          return aEnd - bEnd // ✅ 가까운 예약 마감일 순서대로 정렬
+        })
+      setDeals(sorted)
     }
 
     fetchDeals()
   }, [])
 
+  const openModal = (deal: any) => setSelectedDeal(deal)
+  const closeModal = () => setSelectedDeal(null)
+
   return (
     <div className={styles.page}>
       <div className={styles.heading}>
         <h1>AirDeal</h1>
+        <p>
+          돈은 적어도 떠나고 싶은 이들을 위한 <br />
+          항공 특가 피드 서비스
+        </p>
         <h3>
-          돈은 적어도 떠나고 싶은 이들을 위한<br />
-          항공 특가 프로모션 캘린더 서비스
+          더 편리한 서비스를 만들기 위해 <strong>AirDeal에 대한 피드백</strong>을 받고 있어요. <br />
+          아래 버튼을 눌러 의견을 보내주시면 큰 도움이 됩니다 ✍️
         </h3>
+        <a
+          href="https://docs.google.com/forms/d/e/1FAIpQLSdEXAMPLEFORM"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles['form-button']}
+        >
+          ✉️ 피드백 보내기
+        </a>
       </div>
 
-      <div className={styles['calendar-wrapper']}>
-        <FullCalendar
-          plugins={[dayGridPlugin]}
-          initialView="dayGridMonth"
-          height="auto"
-          locale={koLocale}
-          events={events}
-          eventClick={(info) => {
-            info.jsEvent.preventDefault()
-            if (info.event.url) window.open(info.event.url, '_blank')
-          }}
-          eventDidMount={(info) => {
-            const description = info.event.extendedProps.description
-            if (!description) return
+      <div className={styles.feed}>
+      {deals.map((deal) => {
+        const isExpired = new Date(deal.booking_end).getTime() < Date.now() // ✅ 최신 시점 비교
+          const title = `${isExpired ? '[마감] ' : ''}${deal.airline} - ${deal.deal_name}`
 
-            const tooltip = document.createElement('div')
-            tooltip.innerHTML = description.replace(/\n/g, '<br>')
-            Object.assign(tooltip.style, {
-              position: 'absolute',
-              background: '#333',
-              color: 'white',
-              padding: '6px 12px',
-              borderRadius: '12px',
-              fontSize: '12px',
-              zIndex: '9999',
-              whiteSpace: 'nowrap',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-              transition: 'opacity 0.2s ease',
-              opacity: '0',
-              pointerEvents: 'auto',
-            })
-
-            let hideTimeout: ReturnType<typeof setTimeout> | null = null
-            let tooltipVisible = false
-
-            const showTooltip = () => {
-              if (tooltipVisible) return
-              document.body.appendChild(tooltip)
-              const rect = info.el.getBoundingClientRect()
-              tooltip.style.top = `${rect.top + window.scrollY + 20}px`
-              tooltip.style.left = `${rect.left + window.scrollX}px`
-              requestAnimationFrame(() => {
-                tooltip.style.opacity = '1'
-              })
-              tooltipVisible = true
-            }
-
-            const hideTooltip = () => {
-              if (!tooltipVisible) return
-              tooltip.style.opacity = '0'
-              hideTimeout = setTimeout(() => {
-                if (tooltip.parentNode) {
-                  tooltip.parentNode.removeChild(tooltip)
-                }
-                tooltipVisible = false
-              }, 200)
-            }
-
-            tooltip.addEventListener('mouseenter', () => {
-              if (hideTimeout) clearTimeout(hideTimeout)
-            })
-
-            tooltip.addEventListener('mouseleave', hideTooltip)
-
-            info.el.addEventListener('mouseenter', () => {
-              if (hideTimeout) clearTimeout(hideTimeout)
-              showTooltip()
-            })
-
-            info.el.addEventListener('mouseleave', () => {
-              hideTimeout = setTimeout(hideTooltip, 200)
-            })
-
-            info.el.addEventListener('click', (e) => {
-              e.preventDefault()
-              tooltipVisible ? hideTooltip() : showTooltip()
-            })
-          }}
-        />
+          return (
+            <div
+              key={deal.id}
+              className={`${styles['deal-card']} ${isExpired ? styles['expired'] : ''}`}
+              onClick={() => openModal(deal)}
+            >
+              <h2>{title}</h2>
+              <p>{deal.department} → {deal.arrival}</p>
+              <p>{deal.discount_rate}</p>
+              <p>{formatKSTDate(deal.booking_start)} - {formatKSTDate(deal.booking_end)}</p>
+            </div>
+          )
+        })}
       </div>
+
+      {selectedDeal && (
+        <div className={styles['modal-backdrop']} onClick={closeModal}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+          <h2>{
+            new Date(selectedDeal.booking_end).getTime() < Date.now()
+              ? `[마감] ${selectedDeal.airline} - ${selectedDeal.deal_name}`
+              : `${selectedDeal.airline} - ${selectedDeal.deal_name}`
+          }</h2>
+            <p><strong>노선:</strong> {selectedDeal.department} → {selectedDeal.arrival}</p>
+            <p><strong>할인정보:</strong> {selectedDeal.discount_rate}</p>
+            <p><strong>예약기간:</strong> {formatKSTDate(selectedDeal.booking_start)} - {formatKSTDate(selectedDeal.booking_end)}</p>
+            <p><strong>특이사항:</strong> {selectedDeal.description}</p>
+            <button
+              className={styles['go-button']}
+              onClick={() => window.open(selectedDeal.source_url, '_blank')}
+            >
+              특가 보러가기
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

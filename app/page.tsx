@@ -71,7 +71,7 @@ export default function Home() {
         <h1>AirDeal</h1>
         <p>
           여행을 꿈꾸는 모두를 위한 <br />
-          항공 특가를 쉽게 모아보는 피드 서비스
+          항공사별 프로모션을 쉽게 모아보는 피드 서비스
         </p>
         <h3>
           더 편리한 서비스를 만들기 위해 <strong>AirDeal에 대한 피드백</strong>을 받고 있어요. <br />

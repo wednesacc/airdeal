@@ -1,114 +1,220 @@
-.page {
+/* 페이지 전체를 감싸는 컨테이너입니다. 넉넉한 여백으로 시원한 느낌을 줍니다. */
+.pageContainer {
   max-width: 640px;
-  margin: 64px auto;
+  margin: 80px auto; /* 상하 여백을 더 주어 안정감을 높입니다. */
   padding: 0 24px;
   display: flex;
   flex-direction: column;
-  gap: 48px;
+  gap: 56px; /* 각 섹션 간의 간격을 넓혀 구분을 명확하게 합니다. */
 }
 
-.heading {
+/* 페이지 상단의 제목과 설명 영역입니다. */
+.header {
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 12px; /* 제목, 설명, 피드백 섹션 간의 간격 조정 */
 }
 
-.heading h1 {
-  font-size: 60px;
-  font-weight: 700;
+.header h1 {
+  font-size: 42px; /* 너무 크지 않으면서도 시선을 사로잡는 크기로 조정 */
+  font-weight: 800; /* 더 굵게 하여 주목도를 높임 */
+  color: var(--color-text-primary);
 }
 
-.heading h3 {
-  font-size: 18px;
-  font-weight: 500;
-  color: var(--text-subtle);
-  line-height: 1.5;
+.header p {
+  font-size: 17px;
+  color: var(--color-text-secondary); /* 덜 중요한 설명은 부드러운 회색으로 */
+  line-height: 1.7; /* 줄 간격을 넓혀 가독성을 극대화합니다. */
 }
 
-.feed {
+.header .subDescription {
+  display: block; /* 줄바꿈 효과와 위쪽 여백을 주기 위해 block으로 설정 */
+  margin-top: 16px; /* <br><br> 대신 CSS로 여백을 주는 것이 더 깔끔합니다. */
+  font-size: 14px; /* 기존 17px보다 작은 크기로 설정 */
+  color: #8b95a1; /* 기존 secondary 색상보다 살짝 더 연하게 하거나, 동일하게 유지할 수 있습니다. */
+}
+
+.header .feedbackSection {
+  margin-top: 24px; /* 피드백 섹션을 위 내용과 시각적으로 분리 */
+  padding: 24px;
+  background-color: var(--color-surface);
+  border-radius: 20px; /* 부드러운 둥근 모서리 */
+}
+
+/* ✈️ 항공권 딜 목록이 표시되는 피드 영역입니다. */
+.feedContainer {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.deal-card {
-  background: var(--bg-light);
-  padding: 16px;
-  border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+/* ✈️ 항공권 딜 하나하나를 나타내는 카드 스타일입니다. */
+.dealCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  background: var(--color-background); /* 배경과 같은 흰색을 사용해 깔끔하게 */
+  border-radius: 20px; /* 토스 앱처럼 부드럽고 큼직한 둥근 모서리 */
+  border: 1px solid var(--color-border); /* 옅은 테두리로 카드 영역을 명확히 구분 */
   cursor: pointer;
-  transition: background 0.2s;
+  /* 마우스를 올렸을 때 부드러운 애니메이션 효과를 줍니다. */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
 }
 
-.deal-card:hover {
-  background: var(--bg-hover);
+/* 마우스를 올리면 카드가 살짝 위로 떠오르는 효과를 주어, 클릭 가능하다는 것을 알려줍니다. */
+.dealCard:hover {
+  transform: translateY(-4px); /* Y축으로 -4px만큼 이동 */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08); /* 그림자를 더 선명하게 */
 }
 
-.modal-backdrop {
+/* ✨ [신규] 카드 내부의 정보 영역 (칩, 이름, 날짜)을 감싸는 컨테이너 */
+.dealInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ✨ [신규] 항공사 이름을 보여줄 '칩' 스타일 */
+.airlineChip {
+  display: inline-block;
+  width: fit-content;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+}
+
+/* ✨ [신규] 항공사별 칩 색상 정의 */
+.chipKoreanAir { background-color: #002c66; }
+.chipJejuAir   { background-color: #ff6900; }
+.chipTwayAir   { background-color: #d9000f; }
+.chipDefault   { background-color: #556270; }
+
+/* 카드 내부의 제목 스타일입니다. */
+.dealCard h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px 0; /* 제목 아래 여백 */
+}
+
+/* 카드 내부의 기간 정보 스타일입니다. */
+.dealCard p {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* 마감된 딜 카드는 흐릿하게 처리하고 클릭할 수 없도록 합니다. */
+.dealCard.expired {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ✨ [신규] 카드 오른쪽에 표시될 화살표 아이콘 스타일 */
+.arrowIcon {
+  color: #b0b8c1; /* 더 부드러운 회색으로 변경 */
+  font-size: 24px;
+  transition: transform 0.2s ease;
+}
+
+.dealCard:hover .arrowIcon {
+  transform: translateX(4px);
+}
+
+/* 팝업(모달) 뒤에 깔리는 어두운 반투명 배경입니다. */
+.modalBackdrop {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--color-backdrop);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
 }
 
-.modal {
-  background: var(--bg-main);
-  padding: 24px;
-  border-radius: 16px;
-  max-width: 400px;
+/* 팝업(모달) 창 자체의 스타일입니다. */
+.modalContent {
+  background: var(--color-background);
+  padding: 32px; /* 내부 여백을 넉넉하게 */
+  border-radius: 24px; /* 더 부드러운 둥근 모서리 */
+  max-width: 420px;
   width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); /* 입체감을 주는 선명한 그림자 */
+  /* 팝업이 나타날 때 살짝 커지는 애니메이션 효과 */
+  animation: modal-appear 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.go-button {
-  margin-top: 20px;
-  padding: 10px 16px;
-  background: var(--foreground);
-  color: var(--background);
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
+@keyframes modal-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 팝업 내부의 텍스트 스타일 */
+.modalContent h2 { font-size: 22px; margin-bottom: 16px; }
+.modalContent p { font-size: 16px; line-height: 1.6; margin-bottom: 12px; }
+
+/* ✨ 버튼 스타일: 중요한 행동을 유도하는 버튼은 강조색을 사용합니다. */
+.button {
+  display: inline-flex; /* 내부 아이콘/텍스트 정렬에 용이 */
+  align-items: center;
+  justify-content: center;
   width: 100%;
-}
-
-.go-button:hover {
-  background: var(--button-primary-hover);
-}
-
-.form-button {
-  text-align: center;
-  padding: 12px 20px;
-  background: var(--foreground);
-  color: var(--background);
+  padding: 16px 24px; /* 버튼을 더 크고 누르기 쉽게 */
+  font-size: 17px;
   font-weight: 600;
-  border-radius: 8px;
+  border: none;
+  border-radius: 16px; /* 부드러운 모서리 */
   cursor: pointer;
+  transition: background-color 0.2s;
+
+  /* 기본 버튼은 파란색 강조색을 사용합니다. */
+  background-color: var(--color-accent);
+  color: white;
+}
+
+.button:hover {
+  background-color: var(--color-accent-hover);
+}
+
+/* ✨ [신규] 피드백 보내기처럼 덜 중요한 행동을 위한 '보조 버튼' 스타일 */
+.buttonSecondary {
+  background-color: #f2f4f6; /* 연한 회색 배경 */
+  color: var(--color-text-primary); /* 진한 회색 텍스트 */
+  font-weight: 500;
+}
+.buttonSecondary:hover {
+  background-color: #e9ecef; /* 호버 시 살짝 어둡게 */
+}
+
+/* 피드백 버튼처럼 내용에 따라 너비가 조절되어야 할 때 사용합니다. */
+.button.fitContent {
   width: fit-content;
-  margin: 0 auto;
 }
 
-.form-button:hover {
-  background: var(--button-primary-hover);
-}
-
+/* 모바일 환경에서는 글자 크기와 여백을 조금씩 줄여 최적화합니다. */
 @media (max-width: 768px) {
-  .heading h1 {
-    font-size: 24px;
+  .header h1 {
+    font-size: 34px;
   }
-
-  .heading h3 {
-    font-size: 14px;
+  .header p {
+    font-size: 16px;
   }
-}
-
-.expired {
-  opacity: 0.5;
-  pointer-events: none;
+  .pageContainer {
+    margin: 48px auto;
+    gap: 40px;
+  }
 }
